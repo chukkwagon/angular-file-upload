@@ -167,7 +167,7 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
          * @param {Function} handler
          */
         bind: function (event, handler) {
-            cancel.push(this.scope.$on(this._timestamp + ':' + event, handler.bind(this)));
+            this.cancelBind.push(this.scope.$on(this._timestamp + ':' + event, handler.bind(this)));
             return this;
         },
 
