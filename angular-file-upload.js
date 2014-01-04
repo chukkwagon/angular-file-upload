@@ -99,7 +99,7 @@ app.directive('ngFileSelect', [ '$fileUploader', function ($fileUploader) {
 /**
  * The angular file upload module
  * @author: nerv
- * @version: 0.2.9.6, 2013-12-06
+ * @version: 0.2.9.7, 2013-01-03
  */
 
 app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', function ($compile, $rootScope, $http, $window) {
@@ -132,6 +132,14 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
             this.addToQueue(items, options);
         }.bind(this));
 
+        this.cancelBind = [];
+        var that = this;
+        this.scope.$on("$destroy", function(event){
+            angular.forEach(that.cancelBind, function (cancel) {
+                cancel();
+            });
+        });
+
         this.bind('beforeupload', Item.prototype._beforeupload);
         this.bind('in:progress', Item.prototype._progress);
         this.bind('in:success', Item.prototype._success);
@@ -159,7 +167,7 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
          * @param {Function} handler
          */
         bind: function (event, handler) {
-            this.scope.$on(this._timestamp + ':' + event, handler.bind(this));
+            cancel.push(this.scope.$on(this._timestamp + ':' + event, handler.bind(this)));
             return this;
         },
 
@@ -615,6 +623,7 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
             item.isUploaded = true;
             item.isSuccess = false;
             item.isError = true;
+            item.progress = 100;
             item.index = null;
             item.uploader.trigger('error', xhr, item, response);
         },
@@ -625,6 +634,7 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
             item.isUploaded = true;
             item.isSuccess = status;
             item.isError = !status;
+            item.progress = 100;
             item.index = null;
             item.uploader.trigger('complete', xhr, item, response);
             item.removeAfterUpload && item.remove();
@@ -638,5 +648,6 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
         hasHTML5: Uploader.prototype.hasHTML5
     };
 }])
+
     return app;
 }));
