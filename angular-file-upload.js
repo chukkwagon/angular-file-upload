@@ -411,7 +411,7 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
             };
 
             xhr.onload = function () {
-                var response = that._transformResponse(xhr.response);
+                var response = that._transformResponse(xhr);
                 var event = that._isSuccessCode(xhr.status) ? 'success' : 'error';
                 that.trigger('in:' + event, xhr, item, response);
                 that.trigger('in:complete', xhr, item, response);
@@ -459,7 +459,7 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
             };
 
             xhr.onload = function () {
-                var response = that._transformResponse(xhr.response);
+                var response = that._transformResponse(xhr);
                 var event = that._isSuccessCode(xhr.status) ? 'success' : 'error';
                 that.trigger('in:' + event, xhr, item, response);
                 that.trigger('in:complete', xhr, item, response);
@@ -517,7 +517,7 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
 
             iframe.unbind().bind('load', function () {
                 var xhr = { response: iframe.contents()[ 0 ].body.innerHTML, status: 200, dummy: true };
-                var response = that._transformResponse(xhr.response);
+                var response = that._transformResponse(xhr);
                 that.trigger('in:complete', xhr, item, response);
             });
 
@@ -540,9 +540,13 @@ app.factory('$fileUploader', [ '$compile', '$rootScope', '$http', '$window', fun
          * @param {*} response
          * @returns {*}
          */
-        _transformResponse: function (response) {
+        _transformResponse: function (xhr) {
+            var response = xhr.response;
+            var headers = function(headerName){
+                return xhr.getResponseHeader(headerName);
+            }
             $http.defaults.transformResponse.forEach(function (transformFn) {
-                response = transformFn(response);
+                response = transformFn(xhr.response, headers);
             });
             return response;
         }
